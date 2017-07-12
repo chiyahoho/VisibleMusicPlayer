@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>13307130207_pj1</title>
+    </head>
+    <body>
+        <br>
+        <audio id="myAudio" src="cover70s.mp3" controls="controls"></audio>
+        </br>
+        <canvas id="myCanvas" width="1000" height="300"></canvas>
+
+        <script>
+        window.onload = function () {
+            window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+            var audioCtx = new window.AudioContext();
+            var myCanvas = document.getElementById('myCanvas');
+            var canCtx = myCanvas.getContext("2d");
+            var myAudio = document.getElementById("myAudio");
+            var audioSrc = audioCtx.createMediaElementSource(myAudio);
+            var analyser = audioCtx.createAnalyser();
+            audioSrc.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            analyser.fftSize = 256;
+            var canW = myCanvas.width;
+            var canH = myCanvas.height;
+            var BL = analyser.frequencyBinCount;
+            var array = new Uint8Array(BL);
+
+            function draw () {
+                var barW = canW / BL;
+                var x = 0;
+                var barH;
+                analyser.getByteFrequencyData(array);
+                canCtx.clearRect(0, 0, canW, canH);
+                for (var i = 0; i < array.length; i++) {
+                    barH = array[i];
+                    canCtx.fillStyle = 'rgb(' + barH + ',' + (255 - barH) + ',0)';
+                    //canCtx.fillStyle = 'rgb(' + Math.min((barH+100),255) + ',100,100)';
+                    canCtx.fillRect(x, canH - barH, barW, barH);
+                    x = x + barW + 0.25;
+                }
+            };
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            };
+            animate();
+        };
+        </script>
+
+    </body>
+</html>
